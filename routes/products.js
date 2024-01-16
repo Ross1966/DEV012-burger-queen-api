@@ -4,7 +4,6 @@ const {
 } = require('../middleware/auth');
 
 module.exports = (app, nextMain) => {
-
   app.get('/products', requireAuth, (req, resp, next) => {
   });
 

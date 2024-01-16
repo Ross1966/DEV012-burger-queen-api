@@ -7,7 +7,7 @@
     "node": ">=16.x"
   },
   "scripts": {
-    "pretest": "eslint .",
+    "pretest": "eslint ",
     "start": "node index.js",
     "test:e2e": "jest --verbose --testPathPattern e2e --globalSetup ./e2e/globalSetup --globalTeardown ./e2e/globalTeardown --runInBand",
     "test:unit": "jest --verbose --testPathIgnorePatterns e2e",
@@ -20,8 +20,9 @@
     "@shelf/jest-mongodb": "^4.1.7",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.19.0",
-    "express": "^4.17.1",
+    "express": "^4.18.2",
     "jsonwebtoken": "^8.5.1",
+    "mongodb": "6.3",
     "mongodb-memory-server": "^8.12.2"
   },
   "devDependencies": {
