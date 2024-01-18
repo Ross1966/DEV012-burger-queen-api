@@ -8,25 +8,92 @@ const {
 const {
   getUsers,
 } = require('../controller/users');
+const { connect } = require('../connect');
 
 const initAdminUser = (app, next) => {
   const { adminEmail, adminPassword } = app.get('config');
   if (!adminEmail || !adminPassword) {
     return next();
   }
+}
 
-  const adminUser = {
+ const adminUser = {
     email: adminEmail,
     password: bcrypt.hashSync(adminPassword, 10),
     roles: { admin: true },
   };
 
+  const config = require('../config');
+
+  
   // TODO: Create admin user
   // First, check if adminUser already exists in the database
   // If it doesn't exist, it needs to be saved
 
-  next();
+/*connect.connect().then((db) => {
+  const collection = db.collection('user');
+  collection
+      .findOne({ email: adminEmail})
+      .then((existingAdminUser) => {
+        if(!existingAdminUser) {
+          return collection.insertOne(adminUser);
+        }
+        console.log('El administrador ya existe');
+        return Promise.resolve(existingAdminUser);
+      
+      })
+      .then(() => {
+        console.log('Usuario creado')
+      })
+
+      next();
+});*/
+
+
+try {
+  const db =  connect();
+  const usersCollection = db.collection('user');
+
+  const adminUserExists = usersCollection.findOne({
+    email: adminEmail,
+  });
+
+  if (!adminUserExists) {
+    usersCollection.insertOne(adminUser);
+  } else {
+    console.error('El  administrador ya existe');
+  }
+
+  /* const con = db.connect();
+const col = con.collection('users');
+const user = col.findOne({ adminEmail });
+if (!user) {
+  col.insertOne(adminUser);
+}
+*/
+  // TODO: Create admin user
+  // First, check if adminUser already exists in the database
+  // If it doesn't exist, it needs to be saved
+
+next();
+
+ // next();
+} catch (error) {
+  // Manejar el error de la consulta a la base de datos
+  console.error(
+    error,
+  );
+  //next();
+
 };
+
+
+
+
+
+
+
+
 
 /*
  * Español:
