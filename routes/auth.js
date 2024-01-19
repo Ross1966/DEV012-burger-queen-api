@@ -8,7 +8,7 @@ const { secret } = config;
 module.exports = (app, nextMain) => {
   app.post('/login', async (req, resp, next) => {
     const { email, password } = req.body;
-    console.log("Request")
+
     if (!email || !password) {
       return next(400);
     }
@@ -32,10 +32,10 @@ module.exports = (app, nextMain) => {
         console.log(tokenIs);
         resp.json({ token: tokenIs });
       }else{
-        next(); //checar el número de error
+        next(400); //checar el número de error
       }
     } catch (error) {
-        console.error("Error");
+      console.error("Error");
     }
 });
   return nextMain();
