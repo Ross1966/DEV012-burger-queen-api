@@ -33,6 +33,7 @@ const initAdminUser = async (app, next) => {
 
     const adminUserExists = await usersCollection.findOne({
       email: adminEmail,
+      //role: 'admin',
     });
 
     if (!adminUserExists) {
@@ -115,7 +116,7 @@ const initAdminUser = async (app, next) => {
  */
 
 module.exports = (app, next) => {
-  app.get('/users', requireAdmin, getUsers);
+  app.get('/users', getUsers);
 
   app.get('/users/:uid', requireAuth, (req, resp) => {
   });
