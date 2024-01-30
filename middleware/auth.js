@@ -1,10 +1,10 @@
 const jwt = require('jsonwebtoken');
-const { secret } = require('../config');
 
-/*module.exports = (secret) => (req, resp, next) => {
+module.exports = (secret) => (req, resp, next) => {
   const { authorization } = req.headers;
 
   if (!authorization) {
+    console.log('Algo pasa')
     return next();
   }
 
@@ -13,68 +13,44 @@ const { secret } = require('../config');
   if (type.toLowerCase() !== 'bearer') {
     return next();
   }
-//JWT.VERIFY -> TOKEN CORRECTO
+
   jwt.verify(token, secret, (err, decodedToken) => {
-    if (err) {
+
+ if (err) {
       return next(403);
     }
+    req.userId = decodedToken.uid;
+    req.userRole = decodedToken.role;
+    return next();
 
     // TODO: Verify user identity using `decodeToken.uid`
-    //console.log(decodedToken);
-    //return decodedToken.uid;
   });
-};*/
+  // next();
+};
 
 module.exports.isAuthenticated = (req) => {
+  const userId = req.userId ? req.userId.toString() : null;
+
+  if (userId) {
+    console.log('Usuario autenticado:', userId);
+    return true;
+  }
+  console.log('Usuario no autenticado');
+  return false;
+
   // TODO: Decide based on the request information whether the user is authenticated
-  //REQUEST TIENE HEADER AUTH: TOKEN, LEER TOKEN, VERIFICAR POR DURACION, OBTENER ROL DEL USUARIO
-  //ROL === ADMIN
-  //TOKEN VALIDO?
-
-  //console.log("REQ: ", req.headers);
-  const { authorization } = req.headers
-  //console.log("Autenticación: ", authorization);
-  if (!authorization) {
-    return false;
-  }
-
-  const [type, token] = authorization.split(' ');
-  if (type.toLowerCase() !== 'bearer') {
-    return false;
-  }
-
-  console.log("Token: ", token);
-  
-/*if(token){
-  jwt.verify(token, secret);
-  console.log("token verificado");
-  return true;
-} else {
-  return false;
-}*/
-
-try {
-  jwt.verify(token, secret);
-  console.log("TOKEN VERIFICADO");
-  return true;
-} catch (error) {
-  return false;
-}
-
 };
 
 module.exports.isAdmin = (req) => {
-  // TODO: Decide based on the request information whether the user is an admin
-  //ADMINISTRADOR?
-  const { authorization } = req.headers
-
-  const [type, token] = authorization.split(' ');
-  const decodedToken = jwt.verify(token, secret);
-  console.log('Token decodificado:', decodedToken);
-
-  console.log("Token de Administrador? ", decodedToken.role === 'admin');
-  return decodedToken.role === 'admin';
+  const userRole = req.userRole ? req.userRole.toString() : null;
+  if (userRole === 'admin') {
+    console.log('Eres un Administrador Middleware ', userRole);
+    return true;
+  }
+  return false;
 };
+
+// TODO: Decide based on the request information whether the user is an admin
 
 module.exports.requireAuth = (req, resp, next) => (
   (!module.exports.isAuthenticated(req))

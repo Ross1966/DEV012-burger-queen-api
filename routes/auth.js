@@ -9,21 +9,25 @@ module.exports = (app, nextMain) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return next(400);
+      return next(401);
     }
 
     // TODO: Authenticate the user
     try {
       const db = await connect();
-      const collection = db.collection('user'); // It is necessary to confirm if the email and password match a user in the database
+      // It is necessary to confirm if the email and password match a user in the database
+      const collection = db.collection('user');
       const userValid = await collection.findOne({ email });
-      //console.log("Login del usuario: ", userValid)
+
+      console.log("Login del usuario: ", userValid);
       if (!userValid) {
-        return next(401);
+        return next(400);
       }
-     const authPassword = password === userValid.password   //await bcrypt.compare(password, userValid.password);
-      console.log("Password Valido? "+authPassword)
- // If they match, send an access token created with JWT
+      // await bcrypt.compare(password, userValid.password);
+      const authPassword = password === userValid.password
+      console.log('Password Valido? '+ authPassword);
+
+// If they match, send an access token created with JWT
       if (authPassword) {
         const tokenIs = jwt.sign(
           {
@@ -34,17 +38,18 @@ module.exports = (app, nextMain) => {
           secret,
           {
             expiresIn: '1h',
-          }
- );
-        console.log("Token creado: "+tokenIs);
+          },
+        );
+        console.log(tokenIs);
         resp.json({ token: tokenIs });
       } else {
         next(400);
       }
     } catch (error) {
-      console.error("Error");
+      console.error('Error', error);
+      next(500);
     }
   });
 
-  return nextMain();
+  return nextMain()
 };

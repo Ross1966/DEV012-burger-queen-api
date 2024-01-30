@@ -7,6 +7,7 @@ const {
 
 const {
   getUsers,
+  createUser,
 } = require('../controller/users');
 
 const { connect } = require('../connect');
@@ -20,7 +21,7 @@ const initAdminUser = async (app, next) => {
   const adminUser = {
     email: adminEmail,
     password: bcrypt.hashSync(adminPassword, 10),
-    role: 'admin',
+    roles: 'admin',
   };
 
   // TODO: Create admin user
@@ -33,7 +34,6 @@ const initAdminUser = async (app, next) => {
 
     const adminUserExists = await usersCollection.findOne({
       email: adminEmail,
-      //role: 'admin',
     });
 
     if (!adminUserExists) {
@@ -44,18 +44,15 @@ const initAdminUser = async (app, next) => {
 
 
 
-  next();
-  
-
-} catch (error) {
-  // Manejar el error de la consulta a la base de datos
+    next();
+  } catch (error) {
+    // Manejar el error de la consulta a la base de datos
     console.error(
       error,
     );
     next();
-}
+  }
 };
-
 
 
 
@@ -116,14 +113,13 @@ const initAdminUser = async (app, next) => {
  */
 
 module.exports = (app, next) => {
-  app.get('/users', getUsers);
+  app.get('/users', requireAdmin, getUsers);
 
   app.get('/users/:uid', requireAuth, (req, resp) => {
   });
 
-  app.post('/users', requireAdmin, (req, resp, next) => {
-    // TODO: Implement the route to add new users
-  });
+  app.post('/users', requireAdmin, createUser);
+  // TODO: Implement the route to add new users;
 
   app.put('/users/:uid', requireAuth, (req, resp, next) => {
   });
