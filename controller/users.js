@@ -13,54 +13,55 @@ module.exports = {
       const usersBd = await collection.find().toArray(); //muestra todo user sin condiciones
       console.log('Usuarios en la Base de Datos: ', usersBd);
 
-      resp.json(usersBd) //establece explícitamente el encabezado Content-Type de la respuesta como application/json. 
+      resp.json(usersBd) // establece explícitamente el encabezado Content-Type de la respuesta como application/json. 
     } catch (error) {
       next(401)
     }
   },
 
-
-
   createUser: async (req, resp, next) => {
     const { email, password, role } = req.body;
-// Si no existe usuario, password o rol
-    if (!email || !password || !role) {
-      console.log("No hay usuario o password")
-      return next(400);
-    }
 
-    const newUser = {
-      email: email,
-      password: bcrypt.hashSync(password, 10),
-      role: role,
-    };
+    // Validaciones
+    if (!email || !password) {
+      return resp.status(400).json({ error: 'Se necesita un email y un password' });
+    }
+    if (password.length < 6) {
+      return resp.status(400).json({ error: 'Debe ser un password mínimo de 6 carácteres' });
+    }
+    const validaEmail = /^\w+([.-_+]?\w+)*@\w+([.-]?\w+)*(\.\w{2,10})+$/;
+    if (!validaEmail.test(email)) {
+      return resp.status(400).json({ error: 'Debe ser un email válido' });
+    }
+    if (!(role === 'admin' || role === 'waiter' || role === 'chef')) {
+      return resp.status(400).json({ error: 'Debe contener un rol válido' });
+    }
 
     try {
       const db = await connect();
-      const usersCollection = db.collection('user');
+      const user = db.collection('user');
 
-      const addUserExists = await usersCollection.findOne({ email: email });
-
-      if (!addUserExists) {
-        const buscar = await usersCollection.insertOne(newUser);
-
-        console.log(buscar);
-        const getAddId = buscar.insertedId;
-        const getAddUser = await usersCollection.findOne({ _id: getAddId });
-        resp.send({
-          "id": getAddId, //addUser._id,
-          "email": getAddUser.email,//addUser.email,
-          "role": getAddUser.role//addUser.role,
-        })
-        console.log('Usuario Creado');
-      } else {
-        console.log('El correo ya esta registrado: ', addUserExists);
-        next(403)
+      // Verificar si el usuario ya existe
+      const existeUser = await user.findOne({ email });
+      if (existeUser) {
+        return resp.status(400).json({ error: 'El usuario ya existe' });
       }
-    } catch (error) {
-      console.error('Error al crear usuario:', error);
-      next(500);
-    }
-  },
 
+      const hashedPassword = bcrypt.hashSync(password, 10);
+      const newUser = { email, password: hashedPassword, role };
+
+      // Insertar el nuevo usuario
+      await user.insertOne(newUser);
+      console.log('Se agregó un nuevo usuario');
+
+      // Enviar respuesta
+      resp.status(201).json({ email, role }); // No incluir la contraseña
+    } catch (error) {
+      console.error('Error al crear un nuevo usuario:', error);
+      resp.status(500).json({ error: 'Error al crear un nuevo usuario' });
+    }
+  }
 };
+
+
+
