@@ -8,6 +8,8 @@ const {
 const {
   getUsers,
   createUser,
+  deleteUser,
+  putUsers,
 } = require('../controller/users');
 
 const { connect } = require('../connect');
@@ -121,11 +123,9 @@ module.exports = (app, next) => {
   app.post('/users', requireAdmin, createUser);
   // TODO: Implement the route to add new users;
 
-  app.put('/users/:uid', requireAuth, (req, resp, next) => {
-  });
+  app.put('/users/:uid', requireAuth, putUsers);
 
-  app.delete('/users/:uid', requireAuth, (req, resp, next) => {
-  });
+  app.delete('/users/:uid', requireAuth, deleteUser);
 
   initAdminUser(app, next);
 };
