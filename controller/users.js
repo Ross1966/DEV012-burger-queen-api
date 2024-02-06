@@ -27,7 +27,7 @@ module.exports = {
     }
   },
   // CREACION DE UN USUARIO
-  createUser: async (req, resp, next) => {
+  postUsers: async (req, resp, next) => {
     const { email, password, role } = req.body;
 
     // Validaciones
@@ -71,7 +71,7 @@ module.exports = {
   },
 
   // BORRAR UN USUARIO
-  deleteUser: async (req, resp, next) => {
+  deleteUsers: async (req, resp, next) => {
     try {
       const db = await connect();
       const user = db.collection('user');

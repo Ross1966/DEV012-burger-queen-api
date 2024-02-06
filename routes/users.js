@@ -7,8 +7,8 @@ const {
 
 const {
   getUsers,
-  createUser,
-  deleteUser,
+  postUsers,
+  deleteUsers,
   putUsers,
 } = require('../controller/users');
 
@@ -120,12 +120,12 @@ module.exports = (app, next) => {
   app.get('/users/:uid', requireAuth, (req, resp) => {
   });
 
-  app.post('/users', requireAdmin, createUser);
+  app.post('/users', requireAdmin, postUsers);
   // TODO: Implement the route to add new users;
 
   app.put('/users/:uid', requireAuth, putUsers);
 
-  app.delete('/users/:uid', requireAuth, deleteUser);
+  app.delete('/users/:uid', requireAuth, deleteUsers);
 
   initAdminUser(app, next);
 };
