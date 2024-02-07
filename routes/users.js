@@ -7,6 +7,7 @@ const {
 
 const {
   getUsers,
+  getUsersUid,
   postUsers,
   deleteUsers,
   putUsers,
@@ -23,7 +24,7 @@ const initAdminUser = async (app, next) => {
   const adminUser = {
     email: adminEmail,
     password: bcrypt.hashSync(adminPassword, 10),
-    roles: 'admin',
+    role: 'admin',
   };
 
   // TODO: Create admin user
@@ -117,8 +118,7 @@ const initAdminUser = async (app, next) => {
 module.exports = (app, next) => {
   app.get('/users', requireAdmin, getUsers);
 
-  app.get('/users/:uid', requireAuth, (req, resp) => {
-  });
+  app.get('/users/:uid', requireAuth, getUsersUid);
 
   app.post('/users', requireAdmin, postUsers);
   // TODO: Implement the route to add new users;

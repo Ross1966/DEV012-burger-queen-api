@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const config = require('../config');
 const { connect } = require('../connect');
+
 
 const { secret } = config;
 
@@ -23,8 +25,8 @@ module.exports = (app, nextMain) => {
       if (!userValid) {
         return next(400);
       }
-      // await bcrypt.compare(password, userValid.password);
-      const authPassword = password === userValid.password
+
+      const authPassword = await bcrypt.compare(password, userValid.password);
       console.log('Password Valido? '+ authPassword);
 
 // If they match, send an access token created with JWT

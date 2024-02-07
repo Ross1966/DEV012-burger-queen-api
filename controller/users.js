@@ -26,11 +26,53 @@ module.exports = {
       next(401);
     }
   },
+
+  getUsersUid: async (req, resp, next) => {
+    try {
+      const db = connect();
+      const user = db.collection('user');
+
+      const userId = req.params.uid;
+      const isObjectId = ObjectId.isValid(userId);
+
+      let query;
+      if (isObjectId) {
+        query = { _id: new ObjectId(userId) };
+      } else  {
+        query = { email: userId }
+      }
+
+      const userData = await user.findOne(query);
+
+      if (!userData) {
+        return resp.status(404).json({ error: 'el ususario solicitado no existe' });
+      }
+      const userDataId = userData._id;
+ 
+      if (req.userRole !== 'admin') {
+        if(req.userId !== userDataId.toString()) {
+          return resp.status(403).json({ error: 'No tienes permiso' });
+        }
+      }
+
+      delete userData.password;
+      resp.json(userData);
+    } catch (error) {
+      console.error(error);
+      resp.status(500).json({ error: 'Error al obtener el usuario' });
+    }
+  },
+
+
+
+
   // CREACION DE UN USUARIO
   postUsers: async (req, resp, next) => {
-    const { email, password, role } = req.body;
+
+ const { email, password, role } = req.body;
 
     // Validaciones
+   // db.user.createIndex({ email: 1 }, { unique: true });
     if (!email || !password) {
       return resp.status(400).json({ error: 'Se necesita un email y un password' });
     }
