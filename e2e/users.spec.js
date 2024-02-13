@@ -98,7 +98,7 @@ describe('POST /users', () => {
   ));
 
   it('should fail with 400 when invalid email', () => (
-    fetchAsAdmin('/users', { method: 'POST', body: { email: 'failemail', password: '123456' } })
+    fetchAsAdmin('/users', { method: 'POST', body: { email: 'failemail', password: '1234566' } })
       .then((resp) => expect(resp.status).toBe(400))
   ));
 
@@ -112,8 +112,8 @@ describe('POST /users', () => {
       method: 'POST',
       body: {
         email: 'test1@test.test',
-        password: '12345',
-        role: "waiter",
+        password: '1234566',
+        role: 'chef',
       },
     })
       .then((resp) => {
@@ -125,7 +125,7 @@ describe('POST /users', () => {
         expect(typeof json.email).toBe('string');
         expect(typeof json.password).toBe('undefined');
         expect(typeof json.role).toBe('string');
-        expect(json.role).toBe("waiter");
+        expect(json.role).toBe('chef'); // waiter
       })
   ));
 
@@ -134,8 +134,8 @@ describe('POST /users', () => {
       method: 'POST',
       body: {
         email: 'admin1@test.test',
-        password: '12345',
-        role: "admin",
+        password: '1234566',
+        role: 'admin',
       },
     })
       .then((resp) => {
@@ -147,14 +147,14 @@ describe('POST /users', () => {
         expect(typeof json.email).toBe('string');
         expect(typeof json.password).toBe('undefined');
         expect(typeof json.role).toBe('string');
-        expect(json.role).toBe("admin");
+        expect(json.role).toBe('admin');
       })
   ));
 
   it('should fail with 403 when user is already registered', () => (
     fetchAsAdmin('/users', {
       method: 'POST',
-      body: { email: 'test@test.test', password: '123456' },
+      body: { email: 'test@test.test', password: '1234566' },
     })
       .then((resp) => expect(resp.status).toBe(403))
   ));
@@ -184,7 +184,7 @@ describe('PUT /users/:uid', () => {
   it('should fail with 403 when not admin tries to change own role', () => (
     fetchAsTestUser('/users/test@test.test', {
       method: 'PUT',
-      body: { role: "admin" },
+      body: { role: 'admin' },
     })
       .then((resp) => expect(resp.status).toBe(403))
   ));

@@ -3,7 +3,6 @@ const bcrypt = require('bcrypt');
 const config = require('../config');
 const { connect } = require('../connect');
 
-
 const { secret } = config;
 
 module.exports = (app, nextMain) => {

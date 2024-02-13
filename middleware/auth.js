@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { secret } = require('../config');
 
 module.exports = (secret) => (req, resp, next) => {
   const { authorization } = req.headers;
@@ -8,19 +9,23 @@ module.exports = (secret) => (req, resp, next) => {
   }
 
   const [type, token] = authorization.split(' ');
-
+  // console.log('Hola' + token);
   if (type.toLowerCase() !== 'bearer') {
     return next();
   }
 
   jwt.verify(token, secret, (err, decodedToken) => {
+  
 
- if (err) {
+if (err) {
       return next(403);
     }
     req.userId = decodedToken.uid;
+    console.log(req.userId);
     req.userRole = decodedToken.role;
+    console.log(req.userRole);
     req.userEmail = decodedToken.email;
+    console.log(req.userEmail);
     return next();
 
     // TODO: Verify user identity using `decodeToken.uid`
@@ -32,10 +37,10 @@ module.exports.isAuthenticated = (req) => {
   const userId = req.userId ? req.userId.toString() : null;
 
   if (userId) {
-    console.log('Usuario autenticado:', userId);
+    // console.log('Usuario autenticado:', userId);
     return true;
   }
-  console.log('Usuario no autenticado');
+  // console.log('Usuario no autenticado');
   return false;
 
   // TODO: Decide based on the request information whether the user is authenticated
@@ -44,7 +49,7 @@ module.exports.isAuthenticated = (req) => {
 module.exports.isAdmin = (req) => {
   const userRole = req.userRole ? req.userRole.toString() : null;
   if (userRole === 'admin') {
-    console.log('Eres un Administrador Middleware ', userRole);
+    // console.log('Eres un Administrador Middleware ', userRole);
     return true;
   }
   return false;

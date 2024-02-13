@@ -3,7 +3,6 @@ const { spawn } = require('child_process');
 const kill = require('tree-kill');
 const { MongoClient } = require('mongodb');
 
-
 const mongoGlobalSetup = require("@shelf/jest-mongodb/lib/setup");
 
 const config = require('../config');
@@ -21,7 +20,8 @@ const __e2e = {
   adminToken: null,
   testUserCredentials: {
     email: 'test@test.test',
-    password: '123456',
+    password: '1234566',
+    role: 'chef'
   },
   testUserToken: null,
   childProcessPid: null,
@@ -55,13 +55,13 @@ const fetchWithAuth = (token) => (url, opts = {}) => fetch(url, {
 
 const fetchAsAdmin = (url, opts) => fetchWithAuth(__e2e.adminToken)(url, opts);
 const fetchAsTestUser = (url, opts) => fetchWithAuth(__e2e.testUserToken)(url, opts);
-//console.log( __e2e.testUserCredentials)
+
 const createTestUser = () => fetchAsAdmin('/users', {
   method: 'POST',
   body: __e2e.testUserCredentials,
-  })
+})
   .then((resp) => {
-    if (resp.status !== 200) {
+    if (resp.status !== 201) {
       throw new Error(`Error: Could not create test user - response ${resp.status}`);
     }
     return fetch('/login', { method: 'POST', body: __e2e.testUserCredentials });

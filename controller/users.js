@@ -1,14 +1,16 @@
 // const users = require('../routes/users');
-const bcrypt = require('bcrypt');
 const { ObjectId } = require('mongodb');
-// const { adminEmail } = require('../config');
+const bcrypt = require('bcrypt');
 const { connect } = require('../connect');
+
+// const db = connect();
+
 
 
 module.exports = {
 // CONSULTA DE USUARIOS
-  getUsers: async (req, resp, next) => {
-    // TODO: Implement the necessary function to fetch the `users` collection or table
+  getUsers: async (req, resp) => {
+  // TODO: Implement the necessary function to fetch the `users` collection or table
     try {
       const db = await connect();
       const collection = db.collection('user');
@@ -16,20 +18,20 @@ module.exports = {
       const usersBd = await collection.find().toArray(); // muestra todo user sin condiciones
       // Aqui mostrará el listado de usuarios sin password;
       const users = usersBd.map((user) => ({
-        "id": user._id,
-        "email": user.email,
-        "role": user.role
-      }))
+        id: user._id,
+        email: user.email,
+        role: user.role,
+      }));
 
-      resp.json(users);
+      resp.status(200).json(users);
     } catch (error) {
-      next(401);
+      resp.json({ error });
     }
   },
 
-  getUsersUid: async (req, resp, next) => {
+  getUsersUid: async (req, resp) => {
     try {
-      const db = connect();
+      const db = await connect();
       const user = db.collection('user');
 
       const userId = req.params.uid;
@@ -38,19 +40,20 @@ module.exports = {
       let query;
       if (isObjectId) {
         query = { _id: new ObjectId(userId) };
-      } else  {
+      } else {
         query = { email: userId }
       }
 
       const userData = await user.findOne(query);
+      console.log(userData);
 
       if (!userData) {
         return resp.status(404).json({ error: 'el ususario solicitado no existe' });
       }
       const userDataId = userData._id;
- 
+
       if (req.userRole !== 'admin') {
-        if(req.userId !== userDataId.toString()) {
+        if (req.userId !== userDataId.toString()) {
           return resp.status(403).json({ error: 'No tienes permiso' });
         }
       }
@@ -63,23 +66,21 @@ module.exports = {
     }
   },
 
-
-
-
   // CREACION DE UN USUARIO
-  postUsers: async (req, resp, next) => {
-
- const { email, password, role } = req.body;
+  postUsers: async (req, resp) => {
+    const { email, password, role } = req.body;
+    console.log(req.body);
 
     // Validaciones
-   // db.user.createIndex({ email: 1 }, { unique: true });
+    // db.user.createIndex({ email: 1 }, { unique: true });
     if (!email || !password) {
       return resp.status(400).json({ error: 'Se necesita un email y un password' });
     }
-    if (password.length < 6) {
+    /*if (password.length <= 6) {
       return resp.status(400).json({ error: 'Debe ser un password mínimo de 6 carácteres' });
-    }
+    }*/
     const validaEmail = /^\w+([.-_+]?\w+)*@\w+([.-]?\w+)*(\.\w{2,10})+$/;
+    //const validaEmail = /^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/gm;
     if (!validaEmail.test(email)) {
       return resp.status(400).json({ error: 'Debe ser un email válido' });
     }
@@ -91,20 +92,24 @@ module.exports = {
       const db = await connect();
       const user = db.collection('user');
 
-      // Verificar si el usuario ya existe tomando en cuenta si está escrito con mayúsculas o minúsculas
+    // Verificar si el usuario ya existe tomando en cuenta si está escrito con mayúsculas o minúsculas
       const existeUser = await user.findOne({ email: email.toLowerCase() });
+
       if (existeUser) {
-        return resp.status(400).json({ error: 'El usuario ya existe' });
+        return resp.status(403).json({ error: 'El usuario ya existe' });
       }
 
       const hashedPassword = bcrypt.hashSync(password, 10);
-      const newUser = { email, password: hashedPassword, role };
+      //const newUser = { email, password: hashedPassword, role };
+      const newUser = { email: email.toLowerCase(), password: hashedPassword, role };
 
       // Insertar el nuevo usuario
       await user.insertOne(newUser);
-      console.log('Se agregó un nuevo usuario');
+      console.log('-----Se agregó un nuevo usuario');
 
       // Enviar respuesta
+      // delete newUser.password;
+      // resp.status(200).json(newUser);
       resp.status(201).json({ email, role }); // No incluir la contraseña
     } catch (error) {
       console.error('Error al crear un nuevo usuario:', error);
@@ -113,7 +118,7 @@ module.exports = {
   },
 
   // BORRAR UN USUARIO
-  deleteUsers: async (req, resp, next) => {
+  deleteUsers: async (req, resp) => {
     try {
       const db = await connect();
       const user = db.collection('user');
@@ -184,15 +189,14 @@ module.exports = {
       // Validar permisos para actualizar
       if (req.userId !== userDataId.toString()) {
         console.log(req.userId, 'del body');
-        console.log(userDataId,'del token');
-        if(req.userRole !== 'admin') {
+        console.log(userDataId, 'del token');
+        if (req.userRole !== 'admin') {
           console.log(req.userRole, 'en el body');
           return resp.status(403).json({ error: 'No tienes permiso para actualizar este usuario' });
         }
       }
-
-
-      const body = req.body;
+// Aqui modifiqué
+      const body = await req.body;
       console.log(body.password);
       if (body.hasOwnProperty('password')) {
         const hashedPassword = bcrypt.hashSync(body.password, 10);

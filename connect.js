@@ -5,7 +5,7 @@ const { dbUrl } = config;
 
 
 
-const client = new MongoClient(config.dbUrl);
+const client = new MongoClient(dbUrl);
 // TODO Conexión a la Base de Datos
 async function connect() {
   try {
