@@ -26,8 +26,8 @@ describe.only('POST /products', () => {
       body: {
         name: 'Test',
         price: 5,
-        image: "https://github.com/Laboratoria/bootcamp/tree/main/projects/04-burger-queen-api/resources/images/water.jpg",
-        type: "Lunch"
+        image: 'https://github.com/Laboratoria/bootcamp/tree/main/projects/04-burger-queen-api/resources/images/water.jpg',
+        type: 'Lunch',
       },
     })
       .then((resp) => {

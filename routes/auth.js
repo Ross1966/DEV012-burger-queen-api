@@ -20,15 +20,15 @@ module.exports = (app, nextMain) => {
       const collection = db.collection('user');
       const userValid = await collection.findOne({ email });
 
-      console.log("Login del usuario: ", userValid);
+      // console.log("Login del usuario: ", userValid);
       if (!userValid) {
         return next(400);
       }
 
       const authPassword = await bcrypt.compare(password, userValid.password);
-      console.log('Password Valido? '+ authPassword);
+      // console.log('Password Valido? '+ authPassword);
 
-// If they match, send an access token created with JWT
+      // If they match, send an access token created with JWT
       if (authPassword) {
         const tokenIs = jwt.sign(
           {
@@ -41,7 +41,7 @@ module.exports = (app, nextMain) => {
             expiresIn: '1h',
           },
         );
-        console.log(tokenIs);
+        // console.log(tokenIs);
         resp.json({ token: tokenIs });
       } else {
         next(400);

@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { secret } = require('../config');
+// const { secret } = require('../config');
 
 module.exports = (secret) => (req, resp, next) => {
   const { authorization } = req.headers;
@@ -15,17 +15,15 @@ module.exports = (secret) => (req, resp, next) => {
   }
 
   jwt.verify(token, secret, (err, decodedToken) => {
-  
-
-if (err) {
+    if (err) {
       return next(403);
     }
     req.userId = decodedToken.uid;
-    console.log(req.userId);
+    // console.log(req.userId);
     req.userRole = decodedToken.role;
-    console.log(req.userRole);
+    // console.log(req.userRole);
     req.userEmail = decodedToken.email;
-    console.log(req.userEmail);
+    // console.log(req.userEmail);
     return next();
 
     // TODO: Verify user identity using `decodeToken.uid`

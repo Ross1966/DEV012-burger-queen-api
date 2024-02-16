@@ -42,10 +42,8 @@ const initAdminUser = async (app, next) => {
     if (!adminUserExists) {
       await usersCollection.insertOne(adminUser);
     } else {
-      console.log('El  administrador ya existe');
+      console.info('El  administrador ya existe');
     }
-
-
 
     next();
   } catch (error) {
@@ -53,12 +51,9 @@ const initAdminUser = async (app, next) => {
     console.error(
       error,
     );
-    next();
+    // next();
   }
 };
-
-
-
 
 /*
  * Español:

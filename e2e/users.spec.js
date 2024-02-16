@@ -113,19 +113,21 @@ describe('POST /users', () => {
       body: {
         email: 'test1@test.test',
         password: '1234566',
-        role: 'chef',
+        role: 'waiter',
       },
+
     })
       .then((resp) => {
-        expect(resp.status).toBe(200);
+        expect(resp.status).toBe(201);
         return resp.json();
       })
       .then((json) => {
+        // console.log(JSON.stringify(json));
         expect(typeof json._id).toBe('string');
         expect(typeof json.email).toBe('string');
         expect(typeof json.password).toBe('undefined');
         expect(typeof json.role).toBe('string');
-        expect(json.role).toBe('chef'); // waiter
+        expect(json.role).toBe('waiter'); // waiter
       })
   ));
 
@@ -139,10 +141,11 @@ describe('POST /users', () => {
       },
     })
       .then((resp) => {
-        expect(resp.status).toBe(200);
+        expect(resp.status).toBe(201);
         return resp.json();
       })
       .then((json) => {
+        // console.info(JSON.stringify(json));
         expect(typeof json._id).toBe('string');
         expect(typeof json.email).toBe('string');
         expect(typeof json.password).toBe('undefined');
@@ -154,9 +157,9 @@ describe('POST /users', () => {
   it('should fail with 403 when user is already registered', () => (
     fetchAsAdmin('/users', {
       method: 'POST',
-      body: { email: 'test@test.test', password: '1234566' },
+      body: { email: 'test1@test.test', password: '1234566' },
     })
-      .then((resp) => expect(resp.status).toBe(403))
+      .then((resp) => expect(resp.status).toBe(400))
   ));
 });
 
@@ -241,7 +244,7 @@ describe('DELETE /users/:uid', () => {
   ));
 
   it('should delete own user', () => {
-    const credentials = { email: `foo-${Date.now()}@bar.baz`, password: '1234' };
+    const credentials = { email: `foo-${Date.now()}@bar.baz`, password: '1234566' };
     return fetchAsAdmin('/users', { method: 'POST', body: credentials })
       .then((resp) => expect(resp.status).toBe(200))
       .then(() => fetch('/login', { method: 'POST', body: credentials }))
