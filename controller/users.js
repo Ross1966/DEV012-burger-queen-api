@@ -20,7 +20,8 @@ module.exports = {
       const totalUsers = await user.countDocuments();
       const startIndex = (page - 1) * limit;
 
-      const users = await user.find({},{ projection: { password: 0 } }).skip(startIndex).limit(limit).toArray();
+      const users = await user.find({}, { projection:
+         { password: 0 } }).skip(startIndex).limit(limit).toArray();
 
       const consultUsers = {
         totalItems: totalUsers,
@@ -85,10 +86,9 @@ module.exports = {
     if (!email || !password) {
       return resp.status(400).json({ error: 'Se necesita un email y un password' });
     }
-    /* if (password.length <= 6) {
-      return resp.status(400).json({ error: 'Debe ser un password mínimo de 6 carácteres' });
-    }*/
+
     const validaEmail = /^\w+([.-_+]?\w+)*@\w+([.-]?\w+)*(\.\w{2,10})+$/;
+
     // const validaEmail = /^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/gm;
     if (!validaEmail.test(email)) {
       return resp.status(400).json({ error: 'Debe ser un email válido' });
@@ -129,7 +129,7 @@ module.exports = {
   },
 
   // BORRAR UN USUARIO
-  deleteUsers: async (req, resp) => {
+  deleteUsers: async (req, resp, next) => {
     try {
       const db = await connect();
       const user = db.collection('user');
@@ -162,15 +162,14 @@ module.exports = {
         }
       }
       // Elimina al usuario
-      const userDelete = await user.deleteOne(query);
+      const deletedUser = await user.deleteOne(query);
 
-      return resp.status(200).json({ userDelete, message: 'El usuario ha sido borrado, BIEN' });
+      return resp.status(200).json({ deletedUser, message: 'El usuario ha sido borrado, BIEN' });
     } catch (error) {
       console.error(error);
-      // return next(500);
+      return next(500);
     }
   },
-
   // MODIFICAR UN USUARIO
   putUsers: async (req, resp, next) => {
     try {
@@ -206,7 +205,7 @@ module.exports = {
           return resp.status(403).json({ error: 'No tienes permiso para actualizar este usuario' });
         }
       }
-// Aqui modifiqué
+      // Aqui modifiqué
       const body = await req.body;
       // console.log(body.password);
       if (body.hasOwnProperty('password')) {

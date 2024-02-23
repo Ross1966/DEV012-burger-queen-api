@@ -36,9 +36,9 @@ describe('GET /users', () => {
     fetchAsAdmin('/users?_limit=1')
       .then((resp) => {
         expect(resp.status).toBe(200);
-        return resp.json();
+       return resp.json();
       })
-      .then(({ json }) => {
+      .then((json) => {
         expect(Array.isArray(json)).toBe(true);
         expect(json.length).toBe(1);
         expect(json[0]).toHaveProperty('_id');
@@ -244,9 +244,10 @@ describe('DELETE /users/:uid', () => {
   ));
 
   it('should delete own user', () => {
-    const credentials = { email: `foo-${Date.now()}@bar.baz`, password: '1234566' };
+    const credentials = { email: `foo${Date.now()}@bar.baz`, password: '1234', role: 'chef' };
+    console.log(credentials)
     return fetchAsAdmin('/users', { method: 'POST', body: credentials })
-      .then((resp) => expect(resp.status).toBe(200))
+      .then((resp) => expect(resp.status).toBe(201))
       .then(() => fetch('/login', { method: 'POST', body: credentials }))
       .then((resp) => {
         expect(resp.status).toBe(200);
@@ -261,9 +262,9 @@ describe('DELETE /users/:uid', () => {
   });
 
   it('should delete other user as admin', () => {
-    const credentials = { email: `foo-${Date.now()}@bar.baz`, password: '1234' };
+    const credentials = { email: `foo${Date.now()}@bar.baz`, password: '1234', role: 'chef' };
     return fetchAsAdmin('/users', { method: 'POST', body: credentials })
-      .then((resp) => expect(resp.status).toBe(200))
+      .then((resp) => expect(resp.status).toBe(201))
       .then(() => fetchAsAdmin(`/users/${credentials.email}`, { method: 'DELETE' }))
       .then((resp) => expect(resp.status).toBe(200))
       .then(() => fetchAsAdmin(`/users/${credentials.email}`))
