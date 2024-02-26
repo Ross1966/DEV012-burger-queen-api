@@ -20,7 +20,8 @@ const __e2e = {
   adminToken: null,
   testUserCredentials: {
     email: 'test@test.test',
-    password: '123456',
+    password: '1234566',
+    role: 'waiter'
   },
   testUserToken: null,
   childProcessPid: null,
@@ -60,7 +61,7 @@ const createTestUser = () => fetchAsAdmin('/users', {
   body: __e2e.testUserCredentials,
 })
   .then((resp) => {
-    if (resp.status !== 200) {
+    if (resp.status !== 201) {
       throw new Error(`Error: Could not create test user - response ${resp.status}`);
     }
     return fetch('/login', { method: 'POST', body: __e2e.testUserCredentials });
