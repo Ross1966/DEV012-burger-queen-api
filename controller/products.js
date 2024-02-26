@@ -28,9 +28,7 @@ module.exports = {
 
       await products.insertOne(newProduct);
       resp.status(200).json(newProduct);
-      console.log('Se agrego el producto con exito');
-
-} catch (error) {
+    } catch (error) {
       return next(500)
     }
   },
@@ -60,16 +58,13 @@ module.exports = {
 
       const productsId = req.params.productId;
 
-      console.log({productsId});
       if (!/^[0-9a-fA-F]{24}$/.test(productsId)) {
         return resp.status(404).json({ error: 'El ID del producto solicitado no es válido' });
       }
 
       const query = { _id: new ObjectId(productsId) };
-      console.log(query);
 
       const productData = await products.findOne(query);
-      console.log(productData);
 
       if (!productData) {
         return resp.status(404).json({ error: 'el producto solicitado no existe' });
@@ -82,7 +77,7 @@ module.exports = {
     }
   },
 
-// MODIFICACION DE UN PRODUCTO
+  // MODIFICACION DE UN PRODUCTO
 
   putProducts: async (req, resp) => {
     try {

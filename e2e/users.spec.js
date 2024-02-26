@@ -36,7 +36,7 @@ describe('GET /users', () => {
     fetchAsAdmin('/users?_limit=1')
       .then((resp) => {
         expect(resp.status).toBe(200);
-       return resp.json();
+        return resp.json();
       })
       .then((json) => {
         expect(Array.isArray(json)).toBe(true);
