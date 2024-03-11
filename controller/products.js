@@ -1,20 +1,22 @@
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb');
 const { connect } = require('../connect');
 
-const db = connect();
+// const db = await connect();
 
 module.exports = {
 // CREACION DE UN PRODUCTO
   postProducts: async (req, resp, next) => {
-    const { name, price, image, type } = req.body;
+    const { name, price, image, type, dateEntry} = req.body;
     const newProduct = {
       name,
       price,
       image,
       type,
+      dateEntry,
     };
 
     try {
+      const db = await connect();
       const products = db.collection('product');
       // validar si el producto existe
       const productExist = await products.findOne({ name });
@@ -29,14 +31,14 @@ module.exports = {
       await products.insertOne(newProduct);
       resp.status(200).json(newProduct);
     } catch (error) {
-      return next(500)
+      return next(500);
     }
   },
 
   // VISUALIZAR UN PRODUCTO
   getProducts: async (req, resp) => {
     try {
-      // const db = connect();
+      const db = await connect();
       const products = db.collection('product');
 
       // Obtener todos los usuarios de la colección
@@ -52,88 +54,106 @@ module.exports = {
   // VISUALIZAR LOS PRODUCTOS POR ID
 
   getProductsId: async (req, resp) => {
+    // resp.send('GET one product by id IMPLEMENTED')
+    // console.log(req.params);
+     console.log(req.params);
     try {
-      // const db = connect();
-      const products = db.collection('product');
-
-      const productsId = req.params.productId;
-
-      if (!/^[0-9a-fA-F]{24}$/.test(productsId)) {
-        return resp.status(404).json({ error: 'El ID del producto solicitado no es válido' });
+      const db = await connect();
+      const productCollection = db.collection('product');
+      const { productId } = req.params;
+      console.log(productId);
+      // console.log(productId);
+      let productFind = '';
+      if (ObjectId.isValid(productId)) {
+        productFind = await productCollection.findOne({ _id: new ObjectId(productId) });
+      } else {
+        productFind = await productCollection.findOne({ name: { $regex: productId, $options: 'i' } });
       }
-
-      const query = { _id: new ObjectId(productsId) };
-
-      const productData = await products.findOne(query);
-
-      if (!productData) {
-        return resp.status(404).json({ error: 'el producto solicitado no existe' });
-      };
-
-      resp.json(productData);
+      if (!productFind) {
+        resp.status(404).json('Producto no válido');
+      } else {
+        resp.status(200).json(productFind);
+      }
     } catch (error) {
       console.error(error);
-      resp.status(500).json({ error: 'Error al obtener el producto' });
+      resp.status(404).send('El producto no existe');
     }
   },
 
   // MODIFICACION DE UN PRODUCTO
 
   putProducts: async (req, resp) => {
+    // resp.send("PUT IMPLEMENTED");
+    // console.log(req.params.productId, req.body);
     try {
-      const products = db.collection('product');
+      const db = await connect();
+      const productCollection = db.collection('product');
+      const { productId } = req.params;
+      let productFind = '';
 
-      const  productsId = req.params.productId;
+      if (!req.body) {
+        return resp.status(400).json({ error: 'any information is provided' });
+      }
 
-      if (!/^[0-9a-fA-F]{24}$/.test(productsId)) {
-        return resp.status(404).json({ error: 'El ID del producto solicitado no es válido' });
+      if (req.body.status) {
+        const statusValid = ['pending', 'canceled', 'preparing', 'delivering', 'delivered'];
+        if (!statusValid.includes(req.body.status)) {
+          return resp.status(400).json({ error: 'status is not valid' });
+          // return resp.status(404).json({ error: 'status is not valid' });
+        }
+      }
+
+      if (req.body.price) {
+        // console.log(typeof req.body.price != 'number');
+        if (typeof req.body.price != 'number') {
+          return resp.status(400).json({ error: 'price is not valid' });
+        }
+      }
+
+      const updateFields = {
+        ...req.body, // operador 'spread' para traer todos los campos de req.body
+        dateProcessed: new Date().toISOString().slice(0, 19).replace('T', ' '),
       };
+      /* req.body.dateProcessed = new Date().toISOString().slice(0, 19).replace('T', ' ')
+      const updateFields = req.body */
 
-      const query = { _id: new ObjectId(productsId) };
-
-      const productData = await products.findOne(query);
-
-      if (!productData) {
-        return resp.status(404).json({ error: 'El producto solicitado no existe' });
+      if (ObjectId.isValid(productId)) {
+        productFind = await productCollection.findOneAndUpdate(
+          { _id: new ObjectId(productId) },
+          { $set: updateFields },
+          { returnDocument: 'after' }
+        );
+        resp.status(200).json(productFind);
+      } else {
+        resp.status(404).json('Producto no encontrado');
       }
-
-      const body = req.body;
-
-      if (!body || Object.keys(body).length === 0) {
-        return resp.status(400).json({ error: 'Debe haber al menos una propiedad para actualizar' });
-      }
-
-      const productUpdate = await products.updateOne(query, { $set: body });
-
-      resp.json({ productUpdate, message: 'El producto ha sido actualizado' });
     } catch (error) {
-      console.error(error);
-      resp.status(500).json({ error: 'Error al actualizar el producto' });
+      resp.status(404).send('El producto no existe');
     }
   },
 
   // BORRADO DE UN PRODUCTO
 
-  deleteProducts: async ( req, resp) => {
+  deleteProducts: async (req, resp) => {
     try {
-      const products = db.collection('product');
-      const productsId = req.params.productId;
-
-      let query = { _id: new ObjectId(productsId) };
-
-      const productData = await products.findOne(query);
-
-      if (!productData) {
-        return resp.status(404).json({ error: 'El producto solicitado no existe' });
+      const db = await connect();
+      const productCollection = db.collection('product');
+      const { productId } = req.params;
+      // console.log(productId);
+      let productFind = '';
+      if (ObjectId.isValid(productId)) {
+        productFind = await productCollection.findOneAndDelete({ _id: new ObjectId(productId) });
+      } else {
+        productFind = await productCollection.findOneAndDelete({ name: { $regex: productId, $options: 'i' } });
       }
-
-      const productDelete = await products.deleteOne(query);
-
-      resp.status(200).json({ productDelete, message: 'El producto ha sido borrado' });
+      if (!productFind) {
+        resp.status(404).json('Producto no encontrado');
+      } else {
+        resp.status(200).json(productFind);
+      }
     } catch (error) {
       console.error(error);
-      resp.status(500).json({ error: 'Error al borrar el producto' });
+      resp.status(404).send('El producto no existe');
     }
   },
-
 };

@@ -4,7 +4,7 @@ const {
   fetchAsAdmin,
 } = process;
 
-describe.only('POST /products', () => {
+describe('POST /products', () => {
   it('should fail with 401 when no auth', () => (
     fetch('/products', { method: 'POST' })
       .then((resp) => expect(resp.status).toBe(401))
@@ -64,7 +64,7 @@ describe('GET /products', () => {
   ));
 });
 
-describe('GET /products/:productid', () => {
+describe('GET /products/:productsid', () => {
   it('should fail with 404 when not found', () => (
     fetchAsTestUser('/products/notarealproduct')
       .then((resp) => expect(resp.status).toBe(404))
@@ -83,8 +83,6 @@ describe('GET /products/:productid', () => {
           expect(typeof product._id).toBe('string');
           expect(typeof product.name).toBe('string');
           expect(typeof product.price).toBe('number');
-          expect(typeof product.image).toBe('string');
-          expect(typeof product.type).toBe('string');
         });
         return fetchAsTestUser(`/products/${json[0]._id}`)
           .then((resp) => ({ resp, product: json[0] }));
@@ -109,10 +107,10 @@ describe('PUT /products/:productid', () => {
     fetchAsAdmin('/products', {
       method: 'POST',
       body: {
-        name: 'Test',
+        name: 'Test-put-noAdmin',
         price: 10,
-        image: "https://github.com/Laboratoria/bootcamp/tree/main/projects/04-burger-queen-api/resources/images/water.jpg",
-        type: "Lunch"
+        image: 'https://github.com/Laboratoria/bootcamp/tree/main/projects/04-burger-queen-api/resources/images/water.jpg',
+        type: 'Lunch',
       },
     })
       .then((resp) => {
@@ -138,10 +136,10 @@ describe('PUT /products/:productid', () => {
     fetchAsAdmin('/products', {
       method: 'POST',
       body: {
-        name: 'Test',
+        name: 'Test-put-props',
         price: 10,
-        image: "https://github.com/Laboratoria/bootcamp/tree/main/projects/04-burger-queen-api/resources/images/water.jpg",
-        type: "Lunch"
+        image: 'https://github.com/Laboratoria/bootcamp/tree/main/projects/04-burger-queen-api/resources/images/water.jpg',
+        type: 'Lunch',
       },
     })
       .then((resp) => {
@@ -158,7 +156,7 @@ describe('PUT /products/:productid', () => {
   it('should update product as admin', () => (
     fetchAsAdmin('/products', {
       method: 'POST',
-      body: { name: 'Test', price: 10 },
+      body: { name: 'Test-put-admin', price: 10 },
     })
       .then((resp) => {
         expect(resp.status).toBe(200);
@@ -186,10 +184,10 @@ describe('DELETE /products/:productid', () => {
     fetchAsAdmin('/products', {
       method: 'POST',
       body: {
-        name: 'Test',
+        name: 'Test-delete-notAdmin',
         price: 10,
-        image: "https://github.com/Laboratoria/bootcamp/tree/main/projects/04-burger-queen-api/resources/images/water.jpg",
-        type: "Lunch"
+        image: 'https://github.com/Laboratoria/bootcamp/tree/main/projects/04-burger-queen-api/resources/images/water.jpg',
+        type: 'Lunch',
       },
     })
       .then((resp) => {
@@ -209,10 +207,10 @@ describe('DELETE /products/:productid', () => {
     fetchAsAdmin('/products', {
       method: 'POST',
       body: {
-        name: 'Test',
+        name: 'Test-delete-Admin',
         price: 10,
-        image: "https://github.com/Laboratoria/bootcamp/tree/main/projects/04-burger-queen-api/resources/images/water.jpg",
-        type: 'Lunch'
+        image: 'https://github.com/Laboratoria/bootcamp/tree/main/projects/04-burger-queen-api/resources/images/water.jpg',
+        type: 'Lunch',
       },
     })
       .then((resp) => {

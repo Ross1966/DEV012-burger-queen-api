@@ -152,7 +152,6 @@ module.exports = {
         return resp.status(404).json({ error: 'El usuario solicitado no existe' });
       }
 
-
       const userDataId = userData._id;
 
       if (req.userId !== userDataId.toString()) {
